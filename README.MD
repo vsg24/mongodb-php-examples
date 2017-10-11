@@ -185,11 +185,26 @@ $query['author.email'] = 'adam.west@example.com';
 $list = $dm->selectCollection('Articles')->find($query)->toArray();
 ```
 
-*The above code will find any article that includes the keyword `puppy` in its `title` or `category` **AND** has a `cat` **OR** `dog` tag in its array of `tags` Also the author of the article must have an `email` equal to `adam.west@example.com`*.
+*The above code will find any article that includes the keyword `puppy` in its `title` **OR** `category` **AND** has a `cat` **OR** `dog` tag in its array of `tags` Also the author of the article must have an `email` equal to `adam.west@example.com`*.
 
 
 
 **The `$in` operator should be used when performing equality checks on the same field. The `$or` operator could be used to match conditions between multiple fields.**
 
+------
 
+### Working with arrays
+
+#### Pushing to an array (Adding to array)
+
+```Php
+$dm->selectCollection('Articles')->updateOne(
+    ['title' => 'Hello world!'],
+    ['$push' => ['tags' => 'hello']]
+);
+```
+
+*The above snippet updates the first article with the title `Hello World!` and appneds `hello` to its `tags` array.*
+
+**You can also append multiple values to an array using the `$pushAll` operator.**
 
