@@ -2,7 +2,7 @@
 
 
 
-The following cheatsheet assumes that you are using MongoDB 3.4 with PHP 7.0+. In order to connect your PHP app to MongoDB you should install the [official MongoDB driver for PHP](http://php.net/manual/en/set.mongodb.php) and use [mongo-php-library](https://github.com/mongodb/mongo-php-library) to execute queries.
+The following cheatsheet assumes that you are using MongoDB 3.4 with PHP 7.1+. In order to connect your PHP app to MongoDB you should install the [official MongoDB driver for PHP](http://php.net/manual/en/set.mongodb.php) and use [mongo-php-library](https://github.com/mongodb/mongo-php-library) to execute queries.
 
 ------
 
@@ -39,7 +39,7 @@ We used several constants for storing connection info that you should define bef
 
 ------
 
-## Examples
+## 1- Basic examples
 
 ### Find a single document
 
@@ -52,7 +52,7 @@ $user = (array) $dm->selectCollection('Users')->findOne(['_id' => new ObjectID($
 ### Find many documents
 
 ```Php
-$user = $dm->selectCollection('Users')->find([])->toArray();
+$users = $dm->selectCollection('Users')->find([])->toArray();
 ```
 
 ------
@@ -92,4 +92,104 @@ $users = [
 ];
 $dm->selectCollection('Users')->insertMany($users);
 ```
+
+------
+
+### Update one document
+
+```Php
+$dm->selectCollection('Users')->updateOne(
+    ['email' => 'adam.west@example.com'],
+    ['$set' => ['username' => 'ad_west']]
+);
+```
+
+*The above code finds a user with the email `adam.west@example.com` and sets its `username` field to `ad_west` . The `username` field will be created and initialized, If the user doesn't have one .*
+
+------
+
+### Update many documents
+
+```Php
+$dm->selectCollection('Users')->updateMany(
+    [],
+    ['$set' => ['updatedAt' => new \DateTime()]]
+);
+```
+
+*Update all documents in the `Users` collection and set their `updatedAt` field to the current `DateTime`.*
+
+------
+
+### Delete one document
+
+```Php
+$dm->selectCollection('Users')->deleteOne(['firstName' => 'John']);
+```
+
+------
+
+### Delete many documents
+
+```Php
+$dm->selectCollection('Users')->deleteMany([]);
+```
+
+*The above code deletes all documents in the `Users` collection.*
+
+------
+
+## 2- Advanced examples
+
+### Create a collection
+
+```Php
+$dm->createCollection('Articles');
+```
+
+------
+
+### Drop (Remove) a collection
+
+```Php
+$dm->dropCollection('Articles');
+```
+
+*The above code completely removes the `Articles` collection. All documents inside it will be lost.*
+
+------
+
+### Advanced Search
+
+#### Multiple conditions
+
+```Php
+// Input
+$tags = ['cat', 'dog'];
+$search = 'puppy';
+
+// Building the search query
+$query = [];
+$query['$or'] = [
+    ['title' => new \MongoDB\BSON\Regex("$search", '')],
+    ['category' => new \MongoDB\BSON\Regex("$search", '')],
+];
+
+$query['tags'] = [
+    '$in' => $tags
+];
+
+// nested array element check
+$query['author.email'] = 'adam.west@example.com';
+
+$list = $dm->selectCollection('Articles')->find($query)->toArray();
+```
+
+*The above code will find any article that includes the keyword `puppy` in its `title` or `category` **AND** has a `cat` **OR** `dog` tag in its array of `tags` Also the author of the article must have an `email` equal to `adam.west@example.com`*.
+
+
+
+**The `$in` operator should be used when performing equality checks on the same field. The `$or` operator could be used to match conditions between multiple fields.**
+
+
 
