@@ -208,3 +208,20 @@ $dm->selectCollection('Articles')->updateOne(
 
 **You can also append multiple values to an array using the `$pushAll` operator.**
 
+#### Pulling from an array (Removing from array)
+
+```Php
+$this->dm->selectCollection('Articles')->updateMany(
+    [
+        'status' => ['$ne' => 'published']
+    ],
+    [
+        '$pull' => ['tags' => ['enabled' => false]],
+    ],
+    [
+        'multiple' => true
+    ]
+);
+```
+
+*The above code removes all `tags` that have a `enabled` field with the boolean value `false`. It only works on documents that have a `status` field that is NOT equal to `published`.*
